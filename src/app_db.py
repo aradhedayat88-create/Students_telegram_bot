@@ -25,28 +25,77 @@ class Students(Base):
 Base.metadata.create_all(engine)
 
 #-----------------------Create---------------------------
-# user1 = Students(name = "tirdad", surname = "ershadi", age = 33,
-#                 nat_id_num = 246957, courses = "Static, Dynamic", score = 20)
-# sessionlocal.add(user1)
-# sessionlocal.commit()
+def add_student(name, surname, age, nat_id_num, courses, score):
+    new_student = Students(
+        name=name,
+        surname=surname,
+        age=int(age),
+        nat_id_num=int(nat_id_num),
+        courses=courses,
+        score=float(score)
+    )
+    sessionlocal.add(new_student)
+    sessionlocal.commit()
+    return new_student
 #--------------------------------------------------------
 
 #------------------------Update--------------------------
-# update_age = int(input("Enter your age in order to update it: "))
-# user2 = sessionlocal.query(Students).filter(Students.age == int(update_age)).first()
-# user2.age = int(input("Enter your new age in order to update it: "))
-# sessionlocal.commit()
+def update_student(student_id, field, new_value):
+    student = sessionlocal.get(Students, int(student_id))
+    
+    if student is None:
+        return None
+    
+    if field == "name":
+        student.name = new_value
+    elif field == "surname":
+        student.surname = new_value
+    elif field == "age":
+        student.age = int(new_value)
+    elif field == "nat_id_num":
+        student.nat_id_num = int(new_value)
+    elif field == "courses":
+        student.courses = new_value
+    elif field == "score":
+        student.score = float(new_value)
+    else:
+        return "invalid_field"
+    
+    sessionlocal.commit()
+    return student
 #--------------------------------------------------------
 
 #------------------------Delete--------------------------
-# del_by_id = int(input("Enter the id which is going to be deleted: "))
-# user = sessionlocal.get(Students, int(del_by_id))
-# sessionlocal.delete(user)
-# sessionlocal.commit()
+def del_by_id(id):
+    user = sessionlocal.get(Students, int(id))
+    
+    if user is None:
+        return None
+    
+    sessionlocal.delete(user)
+    sessionlocal.commit()
+    return show_list()
 #--------------------------------------------------------
 
 #-------------------------Read---------------------------
-# show_all = sessionlocal.scalars(select(Students)).all()
-# for show in show_all:
-#     print(show.id, show.name, show.surname, show.nat_id_num)
+def show_list():
+    show_all = sessionlocal.scalars(select(Students)).all()
+    result = "📋 لیست دانشجویان\n\n"
+
+    for show in show_all:
+        result += f"👤 دانشجو\n"
+        result += f"🆔 شناسه: {show.id}\n"
+        result += f"نام: {show.name}\n"
+        result += f"نام خانوادگی: {show.surname}\n"
+        result += f"کد ملی: {show.nat_id_num}\n"
+        result += "━━━━━━━━━━━━━━\n"
+
+    return result
+
+def show_by_id(id):
+    student = sessionlocal.query(Students).filter(Students.id == int(id)).first()
+    return student
+
+def show_by_nat_id_num(nat_num):
+    return sessionlocal.query(Students).filter(Students.nat_id_num == int(nat_num)).first()
 #--------------------------------------------------------
